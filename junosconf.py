@@ -58,7 +58,7 @@ def netconf(file_path,conf_method):
         cfg.commit_check()
         print (router[fqdn],": running commit...")
         cfg.commit()
-        print (router[fqdn],": commit succesfull")
+        print (router[fqdn],": commit successful")
         print (router[fqdn],": closing session...")
         dev.close()
         print (router[fqdn],": session closed")
