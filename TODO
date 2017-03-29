@@ -1,4 +1,5 @@
 - implement .lock() and .unlock() to prevent config changes from other users while the script runs
-- add a function for the merge "type" true/false 
+- add a function for the merge "type" true/false
+- rollback to the original configuration when commit_check failed
 - figure out a way to just delete something on every device
 - maybe implement a way to check the configuration snippets for syntax errors (maybe with https://github.com/titom73/junos-conf-checker)
