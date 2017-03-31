@@ -7,11 +7,11 @@ import sys
 import time
 
 router = {
-        'test1': 'x.x.x.x',
-        'test2': 'x.x.x.x'}
+        'test1': 'ENTER IP HERE',
+        'test2': 'ENTER SECOND IP HERE'}
 
-username = "USERNAME"
-password = "PASSWORD"
+username = "ADD YOUR USERNAME HERE"
+password = "ADD THE PASSWORD HERE"
 
 cwd = os.getcwd()
 
