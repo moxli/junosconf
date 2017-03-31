@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
 from pprint import pprint
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
 import os
+import sys
+import time
 
 router = {
         'test1': 'ENTER IP HERE',
@@ -47,21 +50,32 @@ def get_file(conf_method):
 def netconf(file_path,conf_method):
     for fqdn in router:                 
         dev = Device(host=router[fqdn], user=username, password=password)
-        print (router[fqdn],": connecting...")
+        print (router[fqdn],": connecting...",end="")
+        sys.stdout.flush()
         dev.open()
+        print ("done")
         dev.timeout = 300
-        print (router[fqdn],": connection established")
+        print (router[fqdn],": entering configuration mode...",end="")
+        sys.stdout.flush()
         cfg = Config(dev)
-        print (router[fqdn],": loading configuration file")
+        print ("done")
+        print (router[fqdn],": loading the configuration file...",end="")
+        sys.stdout.flush()
         cfg.load(path=file_path,format=conf_method, merge=True)
-        print (router[fqdn],": checking configuration for errors...")
+        print ("done")
+        print (router[fqdn],": checking the configuration for errors...",end="")
+        sys.stdout.flush()
         cfg.commit_check()
-        print (router[fqdn],": running commit...")
+        print ("done")
+        print (router[fqdn],": running commit...",end="")
+        sys.stdout.flush()
         cfg.commit()
-        print (router[fqdn],": commit successful")
-        print (router[fqdn],": closing session...")
+        print ("done")
+        print (router[fqdn],": closing session...",end="")
+        sys.stdout.flush()
         dev.close()
-        print (router[fqdn],": session closed")
+        print ("done")
+        print ("---")
 
 def convert(conf_method):
     if conf_method == 'snip':
