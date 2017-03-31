@@ -7,11 +7,11 @@ import sys
 import time
 
 router = {
-        'test1': '83.142.87.172',
+        'test1': 'x.x.x.x',
         'test2': 'x.x.x.x'}
 
-username = "root"
-password = "test2710"
+username = "USERNAME"
+password = "PASSWORD"
 
 cwd = os.getcwd()
 
