@@ -45,3 +45,9 @@ router = {
         'test1': 'ENTER IP HERE',
         'test2': 'ENTER SECOND IP HERE'}
 ```
+
+### What if
+
+#### commit_check detects an error?
+At the moment commit_check finds an syntax or logical error the script stops and prints out an error.
+You NEED to manually login to the device and rollback the configuration.
