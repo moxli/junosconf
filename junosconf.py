@@ -2,96 +2,155 @@
 from pprint import pprint
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
+import jnpr.junos.exception
 import os
 import sys
-import time
+import getpass
+import argparse
+import socket
 
-router = {
-        'test1': 'ENTER IP HERE',
-        'test2': 'ENTER SECOND IP HERE'}
+#class DoneWithDevice(Exception): pass
 
-username = "ADD YOUR USERNAME HERE"
-password = "ADD THE PASSWORD HERE"
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--ip", help="allows you to add a comma separated list of IPs")
+parser.add_argument("-f", "--fqdn", help="allows you to add a comma separated list of FQDNs")
+parser.add_argument('files', nargs='*')
+args = parser.parse_args()
 
-cwd = os.getcwd()
-
-print ("This script will update the configuration of the following Junos devices:")
-print ("#######################")
-for key,value in router.items():
-    print(key,":", value)
-print ("#######################")
-
-def locate_file(dir):
-    if dir == 'y':
-        name = input('Please enter the _exact_ name of the file containing the config/commands: ')
-        file_exists = os.path.isfile(os.path.join(cwd, name))
-        if file_exists == True:
-            return name
-        else:
-            print ("No file with the name",name,"exists in this directory. Please also check the file permissions!")
-            exit()
-    elif dir == 'n':
-        path = input('Please enter the _exact_ path to the file containing the config/commands: ')
-        path_exists = os.path.isfile(path)
-        if path_exists == True:
-            return path
-        else:
-            print ("No such file exists at",path,"(please also check the file permissions)!")
-            exit()
+def main(args,argv):
+    # Check if any arguments were added
+    if len(argv) == 1:
+        # I will add a function to load a list from a file or entering FQDNs manually, for now you need to add them as arguments
+        print ("please use --help or -h to learn how to use this script")
     else:
-        print ("Sorry...the file must me on this system. I can not load remote files (yet!)")
+        #devices = sys.argv[1:]
+        #print (devices)
+        #print ("resolving FQDNs to IPs...",end="")
+        #sys.stdout.flush()
+        #for ips in range(len(devices)):
+        #    try:
+        #        devices[ips] = socket.gethostbyname(ips)
+        #    except socket.error:
+        #        print (ips, "is not resolvable, please check!")
+        #        exit()
+        #print ("done")
+        #print (devices)
+
+        devices = sys.argv[2:]
+        if args.fqdn:
+            print ("Validating FQDNs:")
+            for fqdn in devices:
+                try:
+                    print (fqdn,"--> ",end="")
+                    sys.stdout.flush()
+                    print (socket.gethostbyname(fqdn))
+                except socket.error:
+                    print ("error:",fqdn, "is not resolvable!")
+                    exit()
+        elif args.ip: 
+            print ("Validating IPs:")
+            for ip in devices:
+                try:
+                    print (ip,"...",end="")
+                    sys.stdout.flush()
+                    socket.inet_aton(ip)
+                    print ("ok")
+                except socket.error:
+                    print ("error:",ip,"is not a valid IP-Address!")
+                    exit()
+        # If neither --ip or --fqdn is added as the first argument exit the script
+        else:
+            print ("please use --help or -h to learn how to use this script")
+            exit()
+
+        print ("Please enter your username and password: ")
+        # Ask for user input of the username
+        username = input('Username: ')
+        # Ask for hidden(no echo to shell) user input of the password
+        password = getpass.getpass('Password: ')
+        
+        # Set cwd to the path of the current working direcotry of the user executing the script
+        cwd = os.getcwd()
+        
+        def locate_file(dir):
+            if dir == 'y':
+                name = input('Please enter the _exact_ name of the file containing the config/commands: ')
+                file_exists = os.path.isfile(os.path.join(cwd, name))
+                if file_exists == True:
+                    return name
+                else:
+                    print ("No file with the name",name,"exists in this directory. Please also check the file permissions!")
+                    exit()
+            elif dir == 'n':
+                path = input('Please enter the _exact_ path to the file containing the config/commands: ')
+                path_exists = os.path.isfile(path)
+                if path_exists == True:
+                    return path
+                else:
+                    print ("No such file exists at",path,"(please also check the file permissions)!")
+                    exit()
+            else:
+                print ("Sorry...the file must me on this system. I can not load remote files (yet!)")
+                exit()
+        
+        def get_file(conf_method):
+            dir = input('Is the configuration file in the same directory as this script? (y/n): ').lower()
+            conf_file = locate_file(dir)
+            return conf_file
+    
+        def netconf(file_path,conf_method):
+            for idx, fqdn in enumerate(devices):                 
+                dev = Device(host=fqdn, user=username, password=password, normalize=True)
+                print (fqdn,": connecting...",end="")
+                sys.stdout.flush()
+                dev.open()
+                print ("done")
+                dev.timeout = 300
+                print (fqdn,": entering configuration mode...",end="")
+                sys.stdout.flush()
+                cfg = Config(dev)
+                print ("done")
+                print (fqdn,": loading the configuration file...",end="")
+                sys.stdout.flush()
+                cfg.load(path=file_path,format=conf_method, merge=True)
+                print ("done")
+                print (fqdn,": checking the configuration for errors...",end="")
+                sys.stdout.flush()
+                cfg.commit_check()
+                print ("done")
+                print ("---")
+                print ("Do you want to make the following changes:")
+                print (cfg.pdiff())
+                print ("---")
+        
+                askForCommit = input("Commit changes? (y/n): ").lower()
+                if askForCommit == 'y':
+                    print (fqdn,": running commit...",end="")
+                    sys.stdout.flush()
+                    cfg.commit()
+                    print ("done")
+                else:
+                    print (fqdn,": rolling back configuration...",end="")
+                    sys.stdout.flush()
+                    cfg.rollback(rb_id=0)
+                    print ("done")
+        def convert(conf_method):
+            if conf_method == 'snip':
+                conf_method = "text"
+                return conf_method
+            elif conf_method == 'set':
+                conf_method = "set"
+                return conf_method
+            else:
+                print ("oops. something went wront with the method you entered")
+
+        print ("What configuration method would you like to use?")
+        print ("You can either use configuration 'snip'pets or 'set' commands")
+        method = input('Please enter "snip" or "set": ')
+        method = convert(method)
+        conf_file = get_file(method)
+        netconf(conf_file,method)
+        print ("Exiting...")
         exit()
 
-def get_file(conf_method):
-    dir = input('Is the configuration file in the same directory as this script? (y/n): ').lower()
-    conf_file = locate_file(dir)
-    return conf_file
-
-def netconf(file_path,conf_method):
-    for fqdn in router:                 
-        dev = Device(host=router[fqdn], user=username, password=password)
-        print (router[fqdn],": connecting...",end="")
-        sys.stdout.flush()
-        dev.open()
-        print ("done")
-        dev.timeout = 300
-        print (router[fqdn],": entering configuration mode...",end="")
-        sys.stdout.flush()
-        cfg = Config(dev)
-        print ("done")
-        print (router[fqdn],": loading the configuration file...",end="")
-        sys.stdout.flush()
-        cfg.load(path=file_path,format=conf_method, merge=True)
-        print ("done")
-        print (router[fqdn],": checking the configuration for errors...",end="")
-        sys.stdout.flush()
-        cfg.commit_check()
-        print ("done")
-        print (router[fqdn],": running commit...",end="")
-        sys.stdout.flush()
-        cfg.commit()
-        print ("done")
-        print (router[fqdn],": closing session...",end="")
-        sys.stdout.flush()
-        dev.close()
-        print ("done")
-        print ("---")
-
-def convert(conf_method):
-    if conf_method == 'snip':
-        conf_method = "text"
-        return conf_method
-    elif conf_method == 'set':
-        conf_method = "set"
-        return conf_method
-    else:
-        print ("oops. something went wront with the method you entered")
-
-print ("What configuration method would you like to use?")
-print ("You can either use configuration 'snip'pets or 'set' commands")
-method = input('Please enter "snip" or "set": ')
-method = convert(method)
-conf_file = get_file(method)
-netconf(conf_file,method)
-print ("Exiting...")
-exit()
+main(args, sys.argv)
