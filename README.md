@@ -31,17 +31,22 @@ sudo pip install junos-eznc
 
 ## Usage
 
-The first thing to do is writing your login credentials and the Junos device IP addresses in to the junosconf.py script
+At the current stage of the script you need to decide between the usage of IP-addresses or fully qualified domain names.
 
-### Login credentials 
+Execute the script with either one of these arguments:
+If you want to use ip addresses add -i or --ip and if you want to use FQDN's add -f or --fqdn.
+
+After the first argument add a comma separated list (just more arguments) of either IP's or FQDN's.
+
+The rest should be pretty much self explanatory, but I will a more detailed README later.
+
+## Example
+
+With FQDN's
 ```
-username = "ADD YOUR USERNAME HERE"
-password = "ADD THE PASSWORD HERE"
+./junosconf.py -f edge2.isp.com edge3.isp.com edge4.isp.com edge5.isp.com
 ```
-### Junos device IP addresses
-You can also add the FQDN/hostname/whatever in the key section of the dicitonary to identify the IP in the value section
+or IP's
 ```
-router = {
-        'test1': 'ENTER IP HERE',
-        'test2': 'ENTER SECOND IP HERE'}
+./junosconf.py -i 10.0.2.100 10.13.37.7 192.168.4.20 10.10.10.10
 ```
