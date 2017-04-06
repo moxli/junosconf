@@ -105,7 +105,7 @@ def main(args,argv):
                 print ("done")
                 print ("---")
                 print ("Do you want to make the following changes:")
-                print (cfg.pdiff())
+                cfg.pdiff()
                 print ("---")
         
                 askForCommit = input("Commit changes? (y/n): ").lower()
