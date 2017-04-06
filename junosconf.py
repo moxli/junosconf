@@ -9,8 +9,6 @@ import getpass
 import argparse
 import socket
 
-#class DoneWithDevice(Exception): pass
-
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--ip", help="allows you to add a comma separated list of IPs")
 parser.add_argument("-f", "--fqdn", help="allows you to add a comma separated list of FQDNs")
@@ -23,19 +21,6 @@ def main(args,argv):
         # I will add a function to load a list from a file or entering FQDNs manually, for now you need to add them as arguments
         print ("please use --help or -h to learn how to use this script")
     else:
-        #devices = sys.argv[1:]
-        #print (devices)
-        #print ("resolving FQDNs to IPs...",end="")
-        #sys.stdout.flush()
-        #for ips in range(len(devices)):
-        #    try:
-        #        devices[ips] = socket.gethostbyname(ips)
-        #    except socket.error:
-        #        print (ips, "is not resolvable, please check!")
-        #        exit()
-        #print ("done")
-        #print (devices)
-
         devices = sys.argv[2:]
         if args.fqdn:
             print ("Validating FQDNs:")
