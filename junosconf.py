@@ -85,40 +85,74 @@ def main(args,argv):
     
         def netconf(file_path,conf_method):
             for idx, fqdn in enumerate(devices):                 
-                dev = Device(host=fqdn, user=username, password=password, normalize=True)
-                print (fqdn,": connecting...",end="")
-                sys.stdout.flush()
-                dev.open()
-                print ("done")
-                dev.timeout = 300
-                print (fqdn,": entering configuration mode...",end="")
-                sys.stdout.flush()
-                cfg = Config(dev)
-                print ("done")
-                print (fqdn,": loading the configuration file...",end="")
-                sys.stdout.flush()
-                cfg.load(path=file_path,format=conf_method, merge=True)
-                print ("done")
-                print (fqdn,": checking the configuration for errors...",end="")
-                sys.stdout.flush()
-                cfg.commit_check()
-                print ("done")
-                print ("---")
-                print ("Do you want to make the following changes:")
-                cfg.pdiff()
-                print ("---")
-        
-                askForCommit = input("Commit changes? (y/n): ").lower()
-                if askForCommit == 'y':
-                    print (fqdn,": running commit...",end="")
+                try:
+                    dev = Device(host=fqdn, user=username, password=password, normalize=True)
+                    print (fqdn,": connecting...",end="")
                     sys.stdout.flush()
-                    cfg.commit()
+                    dev.open()
                     print ("done")
-                else:
-                    print (fqdn,": rolling back configuration...",end="")
+                    dev.timeout = 300
+                    print (fqdn,": entering configuration mode...",end="")
                     sys.stdout.flush()
-                    cfg.rollback(rb_id=0)
+                    cfg = Config(dev)
                     print ("done")
+                    print (fqdn,": entering exclusive configuration mode...",end="")
+                    sys.stdout.flush()
+                    try:
+                        cfg.lock()
+                        print ("done")
+                    except jnpr.junos.exception.LockError as err:
+                        print ("error: " + repr(err))
+                        exit()
+                    print (fqdn,": loading the configuration file...",end="")
+                    sys.stdout.flush()
+                    try:
+                        cfg.load(path=file_path,format=conf_method, merge=True)
+                        print ("done")
+                    except jnpr.junos.exception.ConfigLoadError as err:
+                        print ("error: " + repr(err))
+                        exit()
+                    print (fqdn,": checking the configuration for errors...",end="")
+                    sys.stdout.flush()
+                    try:
+                        cfg.commit_check()
+                        print ("done")
+                    except jnpr.junos.exception.CommitError as err:
+                        print ("error: " + repr(err))
+                    print ("---")
+                    print ("Do you want to make the following changes:")
+                    cfg.pdiff()
+                    print ("---")
+                    askForCommit = input("Commit changes? (y/n): ").lower()
+                    if askForCommit == 'y':
+                        print (fqdn,": running commit...",end="")
+                        sys.stdout.flush()
+                        try:
+                            cfg.commit()
+                            print ("done")
+                        except jnpr.junos.exception.CommitError as err:
+                            print ("error: " + repr(err))
+                    else:
+                        print (fqdn,": rolling back configuration...",end="")
+                        sys.stdout.flush()
+                        try:
+                            cfg.rollback(rb_id=0)
+                            print ("done")
+                        except jnpr.junos.exception.SwRollbackError as err:
+                            print ("error: " + repr(err))
+                    print (fqdn,": exiting exclusive configuration mode...",end="")
+                    sys.stdout.flush()
+                    try:
+                        cfg.unlock()
+                        print ("done")
+                    except jnpr.junos.exception.UnlockError as err:
+                        print ("error: " + repr(err))
+                    print (fqdn,": closing connection...",end="")
+                    sys.stdout.flush()
+                    dev.close()
+                    print ("done")
+                except jnpr.junos.exception.ConnectError as err:
+                    print ("error: " + repr(err))
         def convert(conf_method):
             if conf_method == 'snip':
                 conf_method = "text"
@@ -138,4 +172,7 @@ def main(args,argv):
         print ("Exiting...")
         exit()
 
-main(args, sys.argv)
+if __name__ == '__main__':
+    main(args, sys.argv)
+else:
+    main(args, sys.argv)
