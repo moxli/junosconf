@@ -62,16 +62,14 @@ def main(args, argv):
         def locate_file(dir):
             if dir == 'y':
                 name = input('Please enter the _exact_ name of the config file: ')
-                file_exists = os.path.isfile(os.path.join(cwd, name))
-                if file_exists is True:
+                if os.path.isfile(os.path.join(cwd, name)) is True:
                     return name
                 else:
                     print("No file with the name", name, "exists in this directory.(check permissions!)")
                     exit()
             elif dir == 'n':
                 path = input('Please enter the exact path to the config file: ')
-                path_exists = os.path.isfile(path)
-                if path_exists is True:
+                if os.path.isfile(path) is True:
                     return path
                 else:
                     print("No such file exists at", path, "(check permissions)!")
@@ -165,6 +163,7 @@ def main(args, argv):
                 return conf_method
             else:
                 print("oops. something went wront with the method you entered")
+                exit()
 
         print("What configuration method would you like to use?")
         print("You can either use configuration 'snip'pets or 'set' commands")
