@@ -44,7 +44,7 @@ def main(args, argv):
                     socket.inet_aton(ip)
                     print("ok")
                 except socket.error:
-                    print("error:", ip, "is not a valid IP-Address!")
+                    print("error:", ip, "is not a valid IP-address!")
                     exit()
         # If neither --ip or --fqdn is added as the first argument exit the script
         else:
