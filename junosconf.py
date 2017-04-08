@@ -11,7 +11,7 @@ import socket
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--ip", help="allows you to add a comma separated list of IPs")
 parser.add_argument("-f", "--fqdn", help="allows you to add a comma separated list of FQDNs")
-parser.add_argument('files', nargs='*')
+parser.add_argument('hosts', nargs='*')
 args = parser.parse_args()
 
 
