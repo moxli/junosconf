@@ -8,6 +8,7 @@ import getpass
 import argparse
 import socket
 
+# Parser configuration
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--ip", help="allows you to add a comma separated list of IPs")
 parser.add_argument("-f", "--fqdn", help="allows you to add a comma separated list of FQDNs")
@@ -24,6 +25,7 @@ def main(args, argv):
         '''
         print("please use --help or -h to learn how to use this script")
     else:
+        print("---")
         devices = sys.argv[2:]
         if args.fqdn:
             print("Validating FQDNs:")
@@ -50,12 +52,13 @@ def main(args, argv):
         else:
             print("please use --help or -h to learn how to use this script")
             exit()
-
+        print("---")
         print("Please enter your username and password: ")
         # Ask for user input of the username
         username = input('Username: ')
         # Ask for hidden(no echo to shell) user input of the password
         password = getpass.getpass('Password: ')
+        print("---")
         # Set cwd to the path of the current working direcotry of the user executing the script
         cwd = os.getcwd()
 
@@ -63,6 +66,7 @@ def main(args, argv):
             if dir == 'y':
                 name = input('Please enter the _exact_ name of the config file: ')
                 if os.path.isfile(os.path.join(cwd, name)) is True:
+                    print("---")
                     return name
                 else:
                     print("No file with the name", name, "exists in this directory.(check permissions!)")
