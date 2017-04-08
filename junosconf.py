@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from pprint import pprint
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
 import jnpr.junos.exception
@@ -15,144 +14,148 @@ parser.add_argument("-f", "--fqdn", help="allows you to add a comma separated li
 parser.add_argument('files', nargs='*')
 args = parser.parse_args()
 
-def main(args,argv):
+
+def main(args, argv):
     # Check if any arguments were added
     if len(argv) == 1:
-        # I will add a function to load a list from a file or entering FQDNs manually, for now you need to add them as arguments
-        print ("please use --help or -h to learn how to use this script")
+        '''
+        I will add a function to load a list from a file or entering FQDNs manually,
+        for now you need to add them as arguments.
+        '''
+        print("please use --help or -h to learn how to use this script")
     else:
         devices = sys.argv[2:]
         if args.fqdn:
-            print ("Validating FQDNs:")
+            print("Validating FQDNs:")
             for fqdn in devices:
                 try:
-                    print (fqdn,"--> ",end="")
+                    print(fqdn, "--> ", end="")
                     sys.stdout.flush()
-                    print (socket.gethostbyname(fqdn))
+                    print(socket.gethostbyname(fqdn))
                 except socket.error:
-                    print ("error:",fqdn, "is not resolvable!")
+                    print("error:", fqdn, "is not resolvable!")
                     exit()
-        elif args.ip: 
-            print ("Validating IPs:")
+        elif args.ip:
+            print("Validating IPs:")
             for ip in devices:
                 try:
-                    print (ip,"...",end="")
+                    print(ip, "...", end="")
                     sys.stdout.flush()
                     socket.inet_aton(ip)
-                    print ("ok")
+                    print("ok")
                 except socket.error:
-                    print ("error:",ip,"is not a valid IP-Address!")
+                    print("error:", ip, "is not a valid IP-Address!")
                     exit()
         # If neither --ip or --fqdn is added as the first argument exit the script
         else:
-            print ("please use --help or -h to learn how to use this script")
+            print("please use --help or -h to learn how to use this script")
             exit()
 
-        print ("Please enter your username and password: ")
+        print("Please enter your username and password: ")
         # Ask for user input of the username
         username = input('Username: ')
         # Ask for hidden(no echo to shell) user input of the password
         password = getpass.getpass('Password: ')
-        
         # Set cwd to the path of the current working direcotry of the user executing the script
         cwd = os.getcwd()
-        
+
         def locate_file(dir):
             if dir == 'y':
-                name = input('Please enter the _exact_ name of the file containing the config/commands: ')
+                name = input('Please enter the _exact_ name of the config file: ')
                 file_exists = os.path.isfile(os.path.join(cwd, name))
-                if file_exists == True:
+                if file_exists is True:
                     return name
                 else:
-                    print ("No file with the name",name,"exists in this directory. Please also check the file permissions!")
+                    print("No file with the name", name, "exists in this directory.(check permissions!)")
                     exit()
             elif dir == 'n':
-                path = input('Please enter the _exact_ path to the file containing the config/commands: ')
+                path = input('Please enter the exact path to the config file: ')
                 path_exists = os.path.isfile(path)
-                if path_exists == True:
+                if path_exists is True:
                     return path
                 else:
-                    print ("No such file exists at",path,"(please also check the file permissions)!")
+                    print("No such file exists at", path, "(check permissions)!")
                     exit()
             else:
-                print ("Sorry...the file must me on this system. I can not load remote files (yet!)")
+                print("Sorry...the file must me on this system. I can not load remote files (yet!)")
                 exit()
-        
+
         def get_file(conf_method):
             dir = input('Is the configuration file in the same directory as this script? (y/n): ').lower()
             conf_file = locate_file(dir)
             return conf_file
-    
-        def netconf(file_path,conf_method):
-            for idx, fqdn in enumerate(devices):                 
+
+        def netconf(file_path, conf_method):
+            for idx, fqdn in enumerate(devices):
                 try:
                     dev = Device(host=fqdn, user=username, password=password, normalize=True)
-                    print (fqdn,": connecting...",end="")
+                    print(fqdn, ": connecting...", end="")
                     sys.stdout.flush()
                     dev.open()
-                    print ("done")
+                    print("done")
                     dev.timeout = 300
-                    print (fqdn,": entering configuration mode...",end="")
+                    print(fqdn, ": entering configuration mode...", end="")
                     sys.stdout.flush()
                     cfg = Config(dev)
-                    print ("done")
-                    print (fqdn,": entering exclusive configuration mode...",end="")
+                    print("done")
+                    print(fqdn, ": entering exclusive configuration mode...", end="")
                     sys.stdout.flush()
                     try:
                         cfg.lock()
-                        print ("done")
+                        print("done")
                     except jnpr.junos.exception.LockError as err:
-                        print ("error: " + repr(err))
+                        print("error: " + repr(err))
                         exit()
-                    print (fqdn,": loading the configuration file...",end="")
+                    print(fqdn, ": loading the configuration file...", end="")
                     sys.stdout.flush()
                     try:
-                        cfg.load(path=file_path,format=conf_method, merge=True)
-                        print ("done")
+                        cfg.load(path=file_path, format=conf_method, merge=True)
+                        print("done")
                     except jnpr.junos.exception.ConfigLoadError as err:
-                        print ("error: " + repr(err))
+                        print("error: " + repr(err))
                         exit()
-                    print (fqdn,": checking the configuration for errors...",end="")
+                    print(fqdn, ": checking the configuration for errors...", end="")
                     sys.stdout.flush()
                     try:
                         cfg.commit_check()
-                        print ("done")
+                        print("done")
                     except jnpr.junos.exception.CommitError as err:
-                        print ("error: " + repr(err))
-                    print ("---")
-                    print ("Do you want to make the following changes:")
+                        print("error: " + repr(err))
+                    print("---")
+                    print("Do you want to make the following changes:")
                     cfg.pdiff()
-                    print ("---")
+                    print("---")
                     askForCommit = input("Commit changes? (y/n): ").lower()
                     if askForCommit == 'y':
-                        print (fqdn,": running commit...",end="")
+                        print(fqdn, ": running commit...", end="")
                         sys.stdout.flush()
                         try:
                             cfg.commit()
-                            print ("done")
+                            print("done")
                         except jnpr.junos.exception.CommitError as err:
-                            print ("error: " + repr(err))
+                            print("error: " + repr(err))
                     else:
-                        print (fqdn,": rolling back configuration...",end="")
+                        print(fqdn, ": rolling back configuration...", end="")
                         sys.stdout.flush()
                         try:
                             cfg.rollback(rb_id=0)
-                            print ("done")
+                            print("done")
                         except jnpr.junos.exception.SwRollbackError as err:
-                            print ("error: " + repr(err))
-                    print (fqdn,": exiting exclusive configuration mode...",end="")
+                            print("error: " + repr(err))
+                    print(fqdn, ": exiting exclusive configuration mode...", end="")
                     sys.stdout.flush()
                     try:
                         cfg.unlock()
-                        print ("done")
+                        print("done")
                     except jnpr.junos.exception.UnlockError as err:
-                        print ("error: " + repr(err))
-                    print (fqdn,": closing connection...",end="")
+                        print("error: " + repr(err))
+                    print(fqdn, ": closing connection...", end="")
                     sys.stdout.flush()
                     dev.close()
-                    print ("done")
+                    print("done")
                 except jnpr.junos.exception.ConnectError as err:
-                    print ("error: " + repr(err))
+                    print("error: " + repr(err))
+
         def convert(conf_method):
             if conf_method == 'snip':
                 conf_method = "text"
@@ -161,16 +164,17 @@ def main(args,argv):
                 conf_method = "set"
                 return conf_method
             else:
-                print ("oops. something went wront with the method you entered")
+                print("oops. something went wront with the method you entered")
 
-        print ("What configuration method would you like to use?")
-        print ("You can either use configuration 'snip'pets or 'set' commands")
+        print("What configuration method would you like to use?")
+        print("You can either use configuration 'snip'pets or 'set' commands")
         method = input('Please enter "snip" or "set": ')
         method = convert(method)
         conf_file = get_file(method)
-        netconf(conf_file,method)
-        print ("Exiting...")
+        netconf(conf_file, method)
+        print("Exiting...")
         exit()
+
 
 if __name__ == '__main__':
     main(args, sys.argv)
