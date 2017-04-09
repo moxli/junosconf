@@ -8,10 +8,11 @@ import getpass
 import argparse
 import socket
 
+# Parser configuration
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--ip", help="allows you to add a comma separated list of IPs")
 parser.add_argument("-f", "--fqdn", help="allows you to add a comma separated list of FQDNs")
-parser.add_argument('files', nargs='*')
+parser.add_argument('hosts', nargs='*')
 args = parser.parse_args()
 
 
@@ -24,6 +25,7 @@ def main(args, argv):
         '''
         print("please use --help or -h to learn how to use this script")
     else:
+        print("---")
         devices = sys.argv[2:]
         if args.fqdn:
             print("Validating FQDNs:")
@@ -44,34 +46,34 @@ def main(args, argv):
                     socket.inet_aton(ip)
                     print("ok")
                 except socket.error:
-                    print("error:", ip, "is not a valid IP-Address!")
+                    print("error:", ip, "is not a valid IP-address!")
                     exit()
         # If neither --ip or --fqdn is added as the first argument exit the script
         else:
             print("please use --help or -h to learn how to use this script")
             exit()
-
+        print("---")
         print("Please enter your username and password: ")
         # Ask for user input of the username
         username = input('Username: ')
         # Ask for hidden(no echo to shell) user input of the password
         password = getpass.getpass('Password: ')
+        print("---")
         # Set cwd to the path of the current working direcotry of the user executing the script
         cwd = os.getcwd()
 
         def locate_file(dir):
             if dir == 'y':
                 name = input('Please enter the _exact_ name of the config file: ')
-                file_exists = os.path.isfile(os.path.join(cwd, name))
-                if file_exists is True:
+                if os.path.isfile(os.path.join(cwd, name)) is True:
+                    print("---")
                     return name
                 else:
                     print("No file with the name", name, "exists in this directory.(check permissions!)")
                     exit()
             elif dir == 'n':
                 path = input('Please enter the exact path to the config file: ')
-                path_exists = os.path.isfile(path)
-                if path_exists is True:
+                if os.path.isfile(path) is True:
                     return path
                 else:
                     print("No such file exists at", path, "(check permissions)!")
@@ -165,6 +167,7 @@ def main(args, argv):
                 return conf_method
             else:
                 print("oops. something went wront with the method you entered")
+                exit()
 
         print("What configuration method would you like to use?")
         print("You can either use configuration 'snip'pets or 'set' commands")
