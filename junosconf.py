@@ -12,6 +12,7 @@ import socket
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--ip", help="allows you to add a list of IPs separated by spaces")
 parser.add_argument("-f", "--fqdn", help="allows you to add list of FQDNs separated by spaces")
+parser.add_argument("-l", "--load", help="add the path to a file containing target FQDNs or IPs")
 parser.add_argument('hosts', nargs='*')
 args = parser.parse_args()
 
@@ -48,6 +49,11 @@ def main(args, argv):
                 except socket.error:
                     print("error:", ip, "is not a valid IP-address!")
                     exit()
+        elif args.load:
+            print("loading file from", sys.argv[2], "...", end="")
+            sys.stdout.flush()
+            devices = open(sys.argv[2]).read().splitlines()
+            print("done")
         # If neither --ip or --fqdn is added as the first argument exit the script
         else:
             print("please use --help or -h to learn how to use this script")
