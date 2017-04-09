@@ -36,6 +36,9 @@ At the current stage of the script you need to decide between the usage of IP-ad
 Execute the script with either one of these arguments:
 If you want to use ip addresses add -i or --ip and if you want to use FQDN's add -f or --fqdn.
 
+You can also load a file containing a list of targets/hosts (each host must be in a new line).
+You need to make sure that these are working hosts because the script doesn't resolv the FQDNs or validates the IPs.
+
 After the first argument add a comma separated list (just more arguments) of either IP's or FQDN's.
 
 The rest should be pretty much self explanatory, but I will a more detailed README later.
@@ -49,6 +52,10 @@ With FQDN's
 or IP's
 ```
 ./junosconf.py -i 10.0.2.100 10.13.37.7 192.168.4.20 10.10.10.10
+```
+With a independent file of hosts
+```
+./junosconf.py -l ~/development/junosconf/examples/just-a-bunch-of-ips
 ```
 
 ### What if
