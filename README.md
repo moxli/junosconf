@@ -61,5 +61,5 @@ With a independent file of hosts
 ### What if
 
 #### commit_check detects an error?
-At the moment commit_check finds an syntax or logical error the script stops and prints out an error.
+At the moment commit_check finds a syntax or logical error the script stops and prints out an error.
 You NEED to manually login to the device and rollback the configuration.
