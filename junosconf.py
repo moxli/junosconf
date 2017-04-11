@@ -129,6 +129,15 @@ def main(args, argv):
                         print("done")
                     except jnpr.junos.exception.CommitError as err:
                         print("error: " + repr(err))
+                        print(fqdn, ": rolling back configuration...", end="")
+                        sys.stdout.flush()
+                        try:
+                            cfg.rollback(rb_id=0)
+                            print("done")
+                        except jnpr.junos.exception.SwRollbackError as err:
+                            print("error: " + repr(err))
+                            print("Please login to", fqdn, "and rollback the configuration manually!")
+                            exit()
                     print("---")
                     print("Do you want to make the following changes:")
                     cfg.pdiff()
