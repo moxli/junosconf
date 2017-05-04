@@ -1,3 +1,4 @@
 - add a function for the merge "type" true/false
 - figure out a way to just delete something on every device
 - maybe implement a way to check the configuration snippets for syntax errors (maybe with https://github.com/titom73/junos-conf-checker)
+- replace socket.inet_aton(ip) with something that doesnt suck..
