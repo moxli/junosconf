@@ -68,7 +68,8 @@ def main(args, argv):
         # Set cwd to the path of the current working direcotry of the user executing the script
         cwd = os.getcwd()
 
-        def locate_file(dir):
+        def locate_file():
+            dir = input('Is the configuration file in the same directory as this script? (y/n): ').lower()
             if dir == 'y':
                 name = input('Please enter the _exact_ name of the config file: ')
                 if os.path.isfile(os.path.join(cwd, name)) is True:
@@ -87,11 +88,6 @@ def main(args, argv):
             else:
                 print("Sorry...the file must me on this system. I can not load remote files (yet!)")
                 exit()
-
-        def get_file(conf_method):
-            dir = input('Is the configuration file in the same directory as this script? (y/n): ').lower()
-            conf_file = locate_file(dir)
-            return conf_file
 
         def netconf(file_path, conf_method):
             for idx, fqdn in enumerate(devices):
@@ -188,7 +184,7 @@ def main(args, argv):
         print("You can either use configuration 'snip'pets or 'set' commands")
         method = input('Please enter "snip" or "set": ')
         method = convert(method)
-        conf_file = get_file(method)
+        conf_file = locate_file()
         netconf(conf_file, method)
         print("Exiting...")
         exit()
