@@ -35,13 +35,12 @@ At the current stage of the script you need to decide between the usage of IP-ad
 
 Execute the script with either one of these arguments:
 If you want to use ip addresses add -i or --ip and if you want to use FQDN's add -f or --fqdn.
-
-You can also load a file containing a list of targets/hosts (each host must be in a new line).
-You need to make sure that these are working hosts because the script doesn't resolv the FQDNs or validates the IPs.
-
 After the first argument add a comma separated list (just more arguments) of either IP's or FQDN's.
 
-The rest should be pretty much self explanatory, but I will a more detailed README later.
+You can also load a file containing a list of targets/hosts (each host must be in a new line with no spaces in between).
+You need to make sure that these are working hosts because the script doesn't resolv the FQDNs or validate the IPs.
+
+The rest should be pretty much self explanatory, but I will a more detailed README later on.
 
 ## Example
 
@@ -57,9 +56,3 @@ With a independent file of hosts
 ```
 ./junosconf.py -l ~/development/junosconf/examples/just-a-bunch-of-ips
 ```
-
-### What if
-
-#### commit_check detects an error?
-At the moment commit_check finds a syntax or logical error the script stops and prints out an error.
-You NEED to manually login to the device and rollback the configuration.
