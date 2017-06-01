@@ -10,9 +10,7 @@ set system services netconf ssh
 
 - Setup Junipers ["py-junos-eznc"](https://github.com/Juniper/py-junos-eznc)
 
-The repo now comes preinstalled with junos-eznc and all dependencies in a virtualenv.
-Feel free to use it, setup your own virtualenv or just use the globally installed modules on your system.
-Checkout the requirements.txt file for more information what the dependencies are.
+Install the dependencies (checkout the requirements.txt) globally or setup a virtualenv and install the via "pip install -r requirements.txt" while the virtualenv is active.
 
 ## Usage
 
