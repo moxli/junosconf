@@ -133,7 +133,18 @@ def main(args, argv):
                         except jnpr.junos.exception.SwRollbackError as err:
                             print("error: " + repr(err))
                             print("Please login to", fqdn, "and rollback the configuration manually!")
-                            exit()
+                        print(fqdn, ": exiting exclusive configuration mode...", end="")
+                        sys.stdout.flush()
+                        try:
+                            cfg.unlock()
+                            print("done")
+                        except jnpr.junos.exception.UnlockError as err:
+                            print("error: " + repr(err))
+                        print(fqdn, ": closing connection...", end="")
+                        sys.stdout.flush()
+                        dev.close()
+                        print("done")
+                        exit()
                     print("---")
                     print("Do you want to make the following changes:")
                     cfg.pdiff()
