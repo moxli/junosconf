@@ -10,20 +10,19 @@ import socket
 
 # Parser configuration
 parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--ip", help="allows you to add a list of IPs separated by spaces")
-parser.add_argument("-f", "--fqdn", help="allows you to add list of FQDNs separated by spaces")
-parser.add_argument("-l", "--load", help="add the path to a file containing target FQDNs or IPs")
-parser.add_argument('hosts', nargs='*')
+parser.add_argument("-i", "--ip",
+                    help="allows you to add a list of IPs separated by spaces")
+parser.add_argument("-f", "--fqdn",
+                    help="allows you to add list of FQDNs separated by spaces")
+parser.add_argument("-l", "--load",
+                    help="path to a file containing target FQDNs or IPs")
+parser.add_argument("hosts", nargs="*")
 args = parser.parse_args()
 
 
 def main(args, argv):
     # Check if any arguments were added
     if len(argv) == 1:
-        '''
-        I will add a function to load a list from a file or entering FQDNs manually,
-        for now you need to add them as arguments.
-        '''
         print("please use --help or -h to learn how to use this script")
     else:
         print("---")
@@ -54,45 +53,51 @@ def main(args, argv):
             sys.stdout.flush()
             devices = open(sys.argv[2]).read().splitlines()
             print("done")
-        # If neither --ip or --fqdn is added as the first argument exit the script
+        # If neither --ip or --fqdn is added as the first argument exit
         else:
             print("please use --help or -h to learn how to use this script")
             exit()
         print("---")
         print("Please enter your username and password: ")
         # Ask for user input of the username
-        username = input('Username: ')
+        username = input("Username: ")
         # Ask for hidden(no echo to shell) user input of the password
-        password = getpass.getpass('Password: ')
+        password = getpass.getpass("Password: ")
         print("---")
-        # Set cwd to the path of the current working direcotry of the user executing the script
+        # Set current working directory of the user executing the script
         cwd = os.getcwd()
 
         def locate_file():
-            dir = input('Is the configuration file in the same directory as this script? (y/n): ').lower()
-            if dir == 'y':
-                name = input('Please enter the _exact_ name of the config file: ')
+            dir = input("Is the configuration file in the same directory as "
+                        "this script? (y/n): ").lower()
+            if dir == "y":
+                name = input("Please enter the _exact_ name of the config "
+                             "file: ")
                 if os.path.isfile(os.path.join(cwd, name)) is True:
                     print("---")
                     return name
                 else:
-                    print("No file with the name", name, "exists in this directory.(check permissions!)")
+                    print("No file with the name", name,
+                          "exists in this directory.(check permissions!)")
                     exit()
-            elif dir == 'n':
-                path = input('Please enter the exact path to the config file: ')
+            elif dir == "n":
+                path = input("Please enter the exact path to the config file: ")
                 if os.path.isfile(path) is True:
                     return path
                 else:
-                    print("No such file exists at", path, "(check permissions)!")
+                    print("No such file exists at", path,
+                          "(check permissions)!")
                     exit()
             else:
-                print("Sorry...the file must me on this system. I can not load remote files (yet!)")
+                print("Sorry...the file must me on this system. I can not load "
+                      "remote files (yet!)")
                 exit()
 
         def netconf(file_path, conf_method):
             for idx, fqdn in enumerate(devices):
                 try:
-                    dev = Device(host=fqdn, user=username, password=password, normalize=True)
+                    dev = Device(host=fqdn, user=username,
+                                 password=password, normalize=True)
                     print(fqdn, ": connecting...", end="")
                     sys.stdout.flush()
                     dev.open()
@@ -102,7 +107,8 @@ def main(args, argv):
                     sys.stdout.flush()
                     cfg = Config(dev)
                     print("done")
-                    print(fqdn, ": entering exclusive configuration mode...", end="")
+                    print(fqdn, ": entering exclusive configuration mode...",
+                          end="")
                     sys.stdout.flush()
                     try:
                         cfg.lock()
@@ -118,7 +124,8 @@ def main(args, argv):
                     except jnpr.junos.exception.ConfigLoadError as err:
                         print("error: " + repr(err))
                         exit()
-                    print(fqdn, ": checking the configuration for errors...", end="")
+                    print(fqdn, ": checking the configuration for errors...",
+                          end="")
                     sys.stdout.flush()
                     try:
                         cfg.commit_check()
@@ -132,8 +139,10 @@ def main(args, argv):
                             print("done")
                         except jnpr.junos.exception.SwRollbackError as err:
                             print("error: " + repr(err))
-                            print("Please login to", fqdn, "and rollback the configuration manually!")
-                        print(fqdn, ": exiting exclusive configuration mode...", end="")
+                            print("Please login to", fqdn, "and rollback the "
+                                  "configuration manually!")
+                        print(fqdn, ": exiting exclusive configuration mode...",
+                              end="")
                         sys.stdout.flush()
                         try:
                             cfg.unlock()
@@ -166,7 +175,8 @@ def main(args, argv):
                             print("done")
                         except jnpr.junos.exception.SwRollbackError as err:
                             print("error: " + repr(err))
-                    print(fqdn, ": exiting exclusive configuration mode...", end="")
+                    print(fqdn, ": exiting exclusive configuration mode...",
+                          end="")
                     sys.stdout.flush()
                     try:
                         cfg.unlock()
@@ -181,10 +191,10 @@ def main(args, argv):
                     print("error: " + repr(err))
 
         def convert(conf_method):
-            if conf_method == 'snip':
+            if conf_method == "snip":
                 conf_method = "text"
                 return conf_method
-            elif conf_method == 'set':
+            elif conf_method == "set":
                 conf_method = "set"
                 return conf_method
             else:
